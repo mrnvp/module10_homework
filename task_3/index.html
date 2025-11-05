@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Эхо-чат с геолокацией</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #eef1f7;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px;
+    }
+
+    .chat {
+      width: 600px;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .messages {
+      height: 300px;
+      padding: 10px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .message {
+      max-width: 70%;
+      padding: 8px 12px;
+      border-radius: 10px;
+      font-size: 14px;
+      line-height: 1.3;
+      word-wrap: break-word;
+    }
+
+    .message.user {
+      align-self: flex-end;
+      background: #315efb;
+      color: #fff;
+      border-bottom-right-radius: 0;
+    }
+
+    .message.server {
+      align-self: flex-start;
+      background: #e6e9f3;
+      color: #000;
+      border-bottom-left-radius: 0;
+    }
+
+    .controls {
+      display: flex;
+      gap: 8px;
+      padding: 10px;
+      background: #f4f6ff;
+    }
+
+    input {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      outline: none;
+    }
+
+    button {
+      background-color: #315efb;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 10px 15px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background-color: #2448c7;
+    }
+
+    a {
+      color: #315efb;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <h1>Эхо-чат с геолокацией</h1>
+
+  <div class="chat">
+    <div class="messages" id="messages"></div>
+
+    <div class="controls">
+      <input type="text" id="input" placeholder="Введите сообщение..." />
+      <button id="sendBtn">Отправить</button>
+      <button id="geoBtn">Геолокация</button>
+    </div>
+  </div>
+
+  <script>
+    const wsUrl = "wss://echo.websocket.org";
+    const socket = new WebSocket(wsUrl);
+
+    const messages = document.getElementById('messages');
+    const input = document.getElementById('input');
+    const sendBtn = document.getElementById('sendBtn');
+    const geoBtn = document.getElementById('geoBtn');
+
+    function addMessage(text, type = 'server') {
+      const msg = document.createElement('div');
+      msg.classList.add('message', type);
+      msg.innerHTML = text;
+      messages.appendChild(msg);
+      messages.scrollTop = messages.scrollHeight;
+    }
+
+    sendBtn.addEventListener('click', () => {
+      const text = input.value.trim();
+      if (!text) return;
+
+      addMessage(text, 'user');
+      socket.send(text);
+      input.value = '';
+    });
+
+    socket.addEventListener('message', event => {
+      addMessage(event.data, 'server');
+    });
+
+    geoBtn.addEventListener('click', () => {
+      if (!navigator.geolocation) {
+        addMessage("Геолокация не поддерживается вашим браузером", 'server');
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          const link = `https://www.openstreetmap.org/#map=18/${latitude}/${longitude}`;
+          addMessage(`<a href="${link}" target="_blank">Моё местоположение</a>`, 'user');
+          socket.send(`Геолокация: ${latitude}, ${longitude}`);
+        },
+        () => {
+          addMessage("Не удалось получить геолокацию", 'server');
+        }
+      );
+    });
+  </script>
+</body>
+</html>

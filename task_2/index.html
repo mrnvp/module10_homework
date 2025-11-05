@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Размеры экрана</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6ff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    button {
+      background-color: #315efb;
+      color: #fff;
+      border: none;
+      padding: 15px 25px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background-color: #2448c7;
+      box-shadow: 0 4px 10px rgba(49, 94, 251, 0.4);
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body>
+  <button id="btn">Показать размеры экрана</button>
+
+  <script>
+    const btn = document.getElementById('btn');
+
+    btn.addEventListener('click', () => {
+      const width = document.documentElement.clientWidth;
+      const height = document.documentElement.clientHeight;
+
+      alert(`Ширина экрана: ${width}px\nВысота экрана: ${height}px`);
+    });
+  </script>
+</body>
+</html>
